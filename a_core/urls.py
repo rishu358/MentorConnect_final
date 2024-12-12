@@ -29,7 +29,7 @@ urlpatterns = [
     path('', home_view, name='home'),
     path('chat/', include('a_rtchat.urls')),
     path('profile/', include('a_users.urls')),  # This should include all a_users URLs
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

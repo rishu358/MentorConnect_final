@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.templatetags.static import static
 
 class Profile(models.Model):
     USER_TYPES = (
@@ -45,4 +46,4 @@ class Profile(models.Model):
     def avatar(self):
         if self.image:
             return self.image.url
-        return '/static/images/avatar.png'
+        return static('images/avatar.svg')

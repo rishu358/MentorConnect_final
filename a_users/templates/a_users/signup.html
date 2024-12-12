@@ -23,7 +23,7 @@
             {% csrf_token %}
             
             <div class="space-y-4">
-                {% for field in user_form %}
+                {% for field in form %}  <!-- Changed from user_form to form -->
                 <div class="form-group">
                     <label class="block text-sm font-medium text-gray-700">
                         {{ field.label }}

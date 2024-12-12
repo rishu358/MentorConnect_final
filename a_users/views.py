@@ -112,12 +112,10 @@ def user_management_view(request):
     return render(request, 'a_users/profile_edit.html', {'form': form})
 
 
-from django.shortcuts import render, redirect
-from .forms import MentorSignupForm, MenteeSignupForm
+
 
 from django.contrib.auth import login
-from django.shortcuts import render, redirect
-from .forms import UserRegistrationForm, ProfileForm
+
 
 from django.contrib import messages  # Add this import at the top
 
@@ -132,7 +130,7 @@ from .forms import MentorRegistrationForm, MenteeRegistrationForm
 
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
-from .forms import MentorRegistrationForm, MenteeRegistrationForm
+from .forms import MentorRegistrationForm, MenteeRegistrationForm  # Update these imports
 
 def register_mentor(request):
     if request.method == 'POST':

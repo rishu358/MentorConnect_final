@@ -55,3 +55,11 @@ class GroupMessage(models.Model):
             return True 
         except:
             return False
+        
+def clean(self):
+    if not self.body and not self.file:
+        raise ValidationError("Message must have either text or a file.")
+    if self.file:
+        # Validate file size (e.g., max 10MB)
+        if self.file.size > 10 * 1024 * 1024:
+            raise ValidationError("File size cannot exceed 10MB.")

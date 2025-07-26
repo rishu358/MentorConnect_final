@@ -2,11 +2,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from allauth.account.utils import send_email_confirmation
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
+from django.contrib.auth import logout, login # Added login import here
 from django.contrib.auth.models import User
 from django.contrib.auth.views import redirect_to_login
 from django.contrib import messages
-from .forms import *
+from .forms import * # Assuming all necessary forms are imported here, including MentorRegistrationForm, MenteeRegistrationForm, ProfileForm, EmailForm
 
 def home_view(request):
     mentors = Profile.objects.filter(user_type='MENTOR')
@@ -17,31 +17,41 @@ def home_view(request):
 
 def profile_view(request, username=None):
     if username:
-        profile = get_object_or_404(User, username=username).profile
+        try:
+            profile = get_object_or_404(User, username=username).profile
+        except Profile.DoesNotExist:
+            messages.error(request, "Profile not found.")
+            return redirect('home')
     else:
+        if not request.user.is_authenticated:
+            return redirect_to_login(request.get_full_path())
         try:
             profile = request.user.profile
-        except:
-            return redirect_to_login(request.get_full_path())
-    return render(request, 'a_users/profile.html', {'profile':profile})
-
+        except Profile.DoesNotExist:
+            # Create profile if it doesn't exist
+            profile = Profile.objects.create(user=request.user)
+    return render(request, 'a_users/profile.html', {'profile': profile})
 
 @login_required
 def profile_edit_view(request):
-    form = ProfileForm(instance=request.user.profile)  
+    try:
+        profile = request.user.profile
+    except Profile.DoesNotExist:
+        profile = Profile.objects.create(user=request.user)
+    
+    form = ProfileForm(instance=profile)  
     
     if request.method == 'POST':
-        form = ProfileForm(request.POST, request.FILES, instance=request.user.profile)
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
+            messages.success(request, "Profile updated successfully!")
             return redirect('profile')
-        
-    if request.path == reverse('profile-onboarding'):
-        onboarding = True
-    else:
-        onboarding = False
-      
-    return render(request, 'a_users/profile_edit.html', { 'form':form, 'onboarding':onboarding })
+        else:
+            messages.error(request, "Please correct the errors below.")
+            
+    onboarding = request.path == reverse('profile-onboarding')
+    return render(request, 'a_users/profile_edit.html', {'form': form, 'onboarding': onboarding})
 
 @login_required
 def profile_settings_view(request):
@@ -101,36 +111,28 @@ def profile_delete_view(request):
 
 @login_required
 def user_management_view(request):
+    # This view seems to be a duplicate or similar to profile_edit_view.
+    # If it's intended for general user management (e.g., by an admin),
+    # its logic would need to be different to handle other users.
+    # For now, it's updated to use the same logic as profile_edit_view
+    # to ensure a profile exists.
+    try:
+        profile = request.user.profile
+    except Profile.DoesNotExist:
+        profile = Profile.objects.create(user=request.user)
+
     if request.method == 'POST':
-        form = ProfileForm(request.POST, request.FILES, instance=request.user.profile)
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
             messages.success(request, 'Profile updated successfully')
             return redirect('profile')
+        else:
+            messages.error(request, "Please correct the errors below.")
     else:
-        form = ProfileForm(instance=request.user.profile)
+        form = ProfileForm(instance=profile)
     return render(request, 'a_users/profile_edit.html', {'form': form})
 
-
-
-
-from django.contrib.auth import login
-
-
-from django.contrib import messages  # Add this import at the top
-
-from django.shortcuts import render, redirect
-from django.contrib.auth import login
-from .forms import MentorRegistrationForm, MenteeRegistrationForm
-
-# a_users/views.py
-from django.shortcuts import render, redirect
-from django.contrib.auth import login
-from .forms import MentorRegistrationForm, MenteeRegistrationForm
-
-from django.shortcuts import render, redirect
-from django.contrib.auth import login
-from .forms import MentorRegistrationForm, MenteeRegistrationForm  # Update these imports
 
 def register_mentor(request):
     if request.method == 'POST':

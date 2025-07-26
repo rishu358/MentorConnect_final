@@ -11,7 +11,8 @@ urlpatterns = [
     path('emailchange/', profile_emailchange, name="profile-emailchange"),
     path('emailverify/', profile_emailverify, name="profile-emailverify"),
     path('delete/', profile_delete_view, name="profile-delete"),
+    path('manage/', user_management_view, name="manage-profile"),
     # Put the username pattern last as it's the most general
     path('', profile_view, name="profile"),
-    path('<str:username>/', profile_view, name="profile"),
+    path('<str:username>/', profile_view, name="profile-detail"),
 ]
